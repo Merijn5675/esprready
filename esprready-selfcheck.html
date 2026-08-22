@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>esprready — Gratis ESPR Self-Check</title>
+<meta name="description" content="Ontdek in 3 minuten of u voldoet aan het ESPR-vernietigingsverbod voor onverkochte kleding. Gratis, direct resultaat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141f1a;--ink-soft:#2c3a33;--paper:#ecefe8;--paper-2:#e3e7dd;
+    --card:#f5f6f1;--line:#c9cfc2;--muted:#5f685e;
+    --signal:#bb371c;--go:#2f6a4c;--go-soft:#e2ede6;--signal-soft:#f4e2dd;
+    --amber:#b5791a;--amber-soft:#f2e8d4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Inter",system-ui,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;
+    min-height:100vh;display:flex;flex-direction:column}
+  h1,h2,h3{font-family:"Spectral",Georgia,serif;font-weight:500;line-height:1.14;letter-spacing:-0.01em;margin:0}
+  p{margin:0 0 1em}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .wrap{width:100%;max-width:680px;margin:0 auto;padding:0 22px}
+
+  /* header */
+  header{border-bottom:1px solid var(--line);background:var(--paper)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px;text-decoration:none;color:var(--ink)}
+  .brand span{color:var(--go)}
+  .headlabel{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+
+  main{flex:1;display:flex;align-items:center;padding:40px 0}
+  .stage{width:100%}
+
+  /* progress */
+  .prog{height:3px;background:var(--paper-2);border-radius:2px;overflow:hidden;margin-bottom:8px}
+  .prog span{display:block;height:100%;background:var(--go);width:0;transition:width .35s ease}
+  .progmeta{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:0.05em;color:var(--muted);text-transform:uppercase;margin-bottom:30px}
+
+  /* intro */
+  .intro{text-align:center;padding:10px 0}
+  .intro .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--go)}
+  .intro h1{font-size:clamp(28px,5vw,42px);margin:16px 0}
+  .intro p{color:var(--ink-soft);max-width:46ch;margin:0 auto 10px;font-size:18px}
+  .intro .meta{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);margin:24px 0 28px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap}
+  .intro .meta b{color:var(--ink);font-weight:500}
+
+  /* question */
+  .q .step{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:0.06em;color:var(--go);text-transform:uppercase;margin-bottom:12px}
+  .q h2{font-size:clamp(22px,3.6vw,29px);max-width:22ch}
+  .q .help{color:var(--muted);font-size:14.5px;margin-top:12px;max-width:52ch}
+  .opts{display:flex;flex-direction:column;gap:11px;margin-top:26px}
+  .opt{
+    text-align:left;background:var(--card);border:1px solid var(--line);border-radius:4px;
+    padding:16px 18px;font:inherit;color:inherit;cursor:pointer;
+    display:flex;align-items:center;gap:14px;transition:border-color .15s,background .15s,transform .1s;
+  }
+  .opt:hover{border-color:var(--go);background:#fff}
+  .opt:active{transform:scale(.995)}
+  .opt .k{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:3px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .opt:hover .k{border-color:var(--go);color:var(--go)}
+  .opt.sel{border-color:var(--go);background:var(--go-soft)}
+  .opt.sel .k{background:var(--go);color:#fff;border-color:var(--go)}
+
+  .navrow{display:flex;justify-content:space-between;align-items:center;margin-top:28px}
+  .back{background:none;border:none;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);cursor:pointer;padding:8px 2px}
+  .back:hover{color:var(--ink)}
+  .back[disabled]{opacity:0;pointer-events:none}
+
+  .btn{font-family:"IBM Plex Mono",monospace;font-size:14px;letter-spacing:0.02em;text-decoration:none;
+    border-radius:3px;padding:14px 26px;border:1px solid var(--go);background:var(--go);color:#fff;cursor:pointer;
+    transition:background .15s,transform .1s}
+  .btn:hover{background:#255740;transform:translateY(-1px)}
+  .btn.big{padding:16px 34px;font-size:15px}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn-ghost:hover{background:transparent;border-color:var(--ink)}
+
+  /* result */
+  .res{display:none}
+  .verdict{border-radius:5px;padding:26px;border:1px solid;margin-bottom:24px}
+  .verdict.hoog{background:var(--signal-soft);border-color:#e2b6ac}
+  .verdict.middel{background:var(--amber-soft);border-color:#e3d0a4}
+  .verdict.laag{background:var(--go-soft);border-color:#bcd6c8}
+  .verdict.info{background:var(--paper-2);border-color:var(--line)}
+  .verdict .lvl{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:9px}
+  .verdict.hoog .lvl{color:var(--signal)}
+  .verdict.middel .lvl{color:var(--amber)}
+  .verdict.laag .lvl{color:var(--go)}
+  .verdict.info .lvl{color:var(--muted)}
+  .verdict h2{font-size:26px;margin:12px 0 8px}
+  .verdict p{margin:0;color:var(--ink-soft);font-size:15.5px}
+  .dotlvl{width:9px;height:9px;border-radius:50%;background:currentColor}
+
+  .meter{display:flex;gap:6px;margin:18px 0 4px}
+  .seg{flex:1;height:6px;border-radius:3px;background:var(--paper-2)}
+  .seg.on.laag{background:var(--go)}
+  .seg.on.middel{background:var(--amber)}
+  .seg.on.hoog{background:var(--signal)}
+
+  .flags{margin:8px 0 26px}
+  .flags h3{font-size:15px;font-family:"IBM Plex Mono",monospace;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .flag{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+  .flag:first-of-type{border-top:1px solid var(--line)}
+  .flag .ic{flex:0 0 auto;width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;margin-top:2px}
+  .flag.r .ic{background:var(--signal)}
+  .flag.a .ic{background:var(--amber)}
+  .flag.g .ic{background:var(--go)}
+  .flag .t{font-size:15px}
+  .flag .t b{font-weight:600}
+  .flag .t span{display:block;color:var(--muted);font-size:13.5px;margin-top:3px;line-height:1.45}
+
+  /* capture */
+  .capture{background:var(--ink);color:var(--paper);border-radius:5px;padding:28px}
+  .capture h3{color:#fff;font-size:21px;margin-bottom:8px}
+  .capture p{color:#c7d0c8;font-size:14.5px;margin-bottom:18px}
+  .field{display:flex;gap:10px;flex-wrap:wrap}
+  .field input{flex:1;min-width:200px;background:#1f2c26;border:1px solid #35443c;border-radius:3px;padding:13px 15px;color:#fff;font:inherit;font-size:15px}
+  .field input::placeholder{color:#8b968d}
+  .field input:focus{outline:2px solid var(--go);outline-offset:1px;border-color:var(--go)}
+  .capture .btn{background:var(--go)}
+  .capture .fineprint{font-family:"IBM Plex Mono",monospace;font-size:11px;color:#8b968d;margin:14px 0 0}
+  .msg{color:#bcd6c8;font-family:"IBM Plex Mono",monospace;font-size:13px;margin-top:14px}
+
+  .restart{text-align:center;margin-top:24px}
+  .restart button{background:none;border:none;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;cursor:pointer;text-decoration:underline}
+
+  footer{border-top:1px solid var(--line);padding:22px 0}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  footer p{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin:0;max-width:60ch;line-height:1.7}
+
+  button:focus-visible,a:focus-visible{outline:2px solid var(--go);outline-offset:3px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a href="#" class="brand" onclick="restart();return false">espr<span>ready</span></a>
+    <span class="headlabel">Gratis Self-Check</span>
+  </div>
+</header>
+
+<main>
+  <div class="wrap stage">
+
+    <!-- INTRO -->
+    <section id="intro" class="intro">
+      <div class="eyebrow">3 minuten · direct resultaat</div>
+      <h1>Voldoet u aan het ESPR-vernietigingsverbod?</h1>
+      <p>Sinds 19 juli 2026 mogen grote bedrijven onverkochte kleding, accessoires en schoenen niet meer vernietigen. Beantwoord 10 korte vragen en zie meteen waar uw grootste risico's zitten.</p>
+      <div class="meta"><span><b>10</b> vragen</span><span><b>±3</b> min</span><span><b>€0</b> · geen verplichting</span></div>
+      <button class="btn big" onclick="start()">Start de check →</button>
+    </section>
+
+    <!-- QUESTION FLOW -->
+    <section id="quiz" style="display:none">
+      <div class="prog"><span id="bar"></span></div>
+      <div class="progmeta"><span id="pcount">Vraag 1 / 10</span><span id="ptheme"></span></div>
+      <div class="q">
+        <div class="step" id="qstep"></div>
+        <h2 id="qtext"></h2>
+        <p class="help" id="qhelp" style="display:none"></p>
+        <div class="opts" id="opts"></div>
+        <div class="navrow">
+          <button class="back" id="backBtn" onclick="back()">← Terug</button>
+          <span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" class="res">
+      <div class="verdict" id="verdict">
+        <div class="lvl"><span class="dotlvl"></span><span id="lvlText"></span></div>
+        <div class="meter" id="meter"></div>
+        <h2 id="verdictTitle"></h2>
+        <p id="verdictBody"></p>
+      </div>
+
+      <div class="flags" id="flagWrap">
+        <h3>Uw aandachtspunten</h3>
+        <div id="flagList"></div>
+      </div>
+
+      <div class="capture">
+        <h3>Ontvang uw volledige overzicht</h3>
+        <p>Stuur mij een samenvatting per e-mail plus de vervolgstappen die bij mijn score horen.</p>
+        <div class="field">
+          <input type="email" id="email" placeholder="naam@bedrijf.nl" autocomplete="email">
+          <button class="btn" onclick="sendResult()">Stuur mij het overzicht</button>
+        </div>
+        <p class="fineprint">Geen spam. Uw antwoorden blijven vertrouwelijk.</p>
+        <div class="msg" id="captureMsg" style="display:none"></div>
+      </div>
+
+      <div class="restart"><button onclick="restart()">Opnieuw beginnen</button></div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Deze self-check is oriënterend en vormt geen juridisch advies of audit. Gebaseerd op Verordening (EU) 2024/1781 en Gedelegeerde Verordening (EU) 2026/296.</p>
+  </div>
+</footer>
+
+<script>
+  // ---- Question set (grounded in the regulation) ----
+  const Q = [
+    { id:"fte", theme:"Toepasselijkheid",
+      text:"Hoeveel medewerkers heeft uw organisatie?",
+      opts:[
+        {label:"Meer dan 250", v:"groot"},
+        {label:"50 tot 250", v:"middel"},
+        {label:"Minder dan 50", v:"klein"}
+      ]},
+    { id:"omzet", theme:"Toepasselijkheid",
+      text:"Wat is uw jaaromzet (indicatie)?",
+      opts:[
+        {label:"Meer dan €50 miljoen", v:"groot"},
+        {label:"€10–50 miljoen", v:"middel"},
+        {label:"Minder dan €10 miljoen", v:"klein"}
+      ]},
+    { id:"textiel", theme:"Toepasselijkheid",
+      text:"Brengt u kleding, kledingaccessoires of schoeisel op de EU-markt?",
+      help:"Denk ook aan riemen, tassen, sjaals, hoeden — die vallen onder Bijlage VII.",
+      opts:[
+        {label:"Ja", v:"ja"},
+        {label:"Nee", v:"nee"}
+      ]},
+    { id:"praktijk", theme:"Huidige praktijk",
+      text:"Wat gebeurt er nu met onverkochte voorraad en retouren?",
+      opts:[
+        {label:"We vernietigen, recyclen of verbranden (deels)", v:"vernietig", flag:"r"},
+        {label:"Alleen resale, doneren of hergebruik", v:"hergebruik"},
+        {label:"Een mix, wisselt per situatie", v:"mix", flag:"a"},
+        {label:"Weet ik niet precies", v:"onbekend", flag:"a"}
+      ]},
+    { id:"reden", theme:"Documentatie",
+      text:"Legt u per zending vast wát er wordt afgevoerd én waarom?",
+      help:"Let op: een reden-veld in uw systeem (bv. 'beschadigd' of 'retour') is nog geen bewijs. De wet vraagt een reden die gekoppeld is aan een geldige uitzonderingsgrond én onderbouwd wordt door een bewijsstuk. Dat is de volgende vraag.",
+      opts:[
+        {label:"Ja — mét onderliggend bewijs per uitzonderingsgrond", v:"ja"},
+        {label:"Deels — we noteren een reden, maar zonder bewijs erbij", v:"deels", flag:"r"},
+        {label:"Ad hoc, niet consequent", v:"adhoc", flag:"r"},
+        {label:"Nee", v:"nee", flag:"r"}
+      ]},
+    { id:"bewijs", theme:"Documentatie",
+      text:"Bewaart u per vernietiging het bewijs van de uitzonderingsgrond, vijf jaar lang?",
+      help:"De wet vereist bewijs (bv. testrapport, inspectierapport of donatie-aanbod) dat 5 jaar bewaard en binnen 30 dagen opvraagbaar is.",
+      opts:[
+        {label:"Ja", v:"ja"},
+        {label:"Nee, of niet volledig", v:"nee", flag:"r"},
+        {label:"We vernietigen niet", v:"nvt"}
+      ]},
+    { id:"verwerker", theme:"Documentatie",
+      text:"Informeert u uw afvalverwerker vooraf over de van toepassing zijnde uitzonderingsgrond?",
+      opts:[
+        {label:"Ja", v:"ja"},
+        {label:"Nee", v:"nee", flag:"a"},
+        {label:"Weet ik niet", v:"onbekend", flag:"a"}
+      ]},
+    { id:"rapportage", theme:"Rapportage",
+      text:"Publiceert u jaarlijks hoeveel en waarom u onverkochte producten afvoert?",
+      help:"Voor grote ondernemingen geldt deze openbaarmakingsplicht al.",
+      opts:[
+        {label:"Ja", v:"ja"},
+        {label:"In voorbereiding", v:"wip", flag:"a"},
+        {label:"Nee", v:"nee", flag:"r"}
+      ]},
+    { id:"recycling", theme:"Kennis",
+      text:"Wist u dat recycling en verbranding óók als 'vernietiging' tellen onder de ESPR?",
+      opts:[
+        {label:"Ja, dat wist ik", v:"ja"},
+        {label:"Nee, dat is nieuw voor mij", v:"nee", flag:"a"}
+      ]},
+    { id:"fabrikant", theme:"Aansprakelijkheid",
+      text:"Zit uw fabrikant of producent (deels) buiten de EU?",
+      help:"Bepaalt wie in uw keten de ESPR-aansprakelijkheid draagt.",
+      opts:[
+        {label:"Ja, volledig", v:"ja", flag:"a"},
+        {label:"Deels", v:"deels", flag:"a"},
+        {label:"Nee, binnen de EU", v:"nee"}
+      ]}
+  ];
+
+  let idx=0;
+  const answers={};
+
+  const $=id=>document.getElementById(id);
+
+  function start(){ $("intro").style.display="none"; $("quiz").style.display="block"; idx=0; render(); }
+
+  function render(){
+    const q=Q[idx];
+    $("bar").style.width=((idx)/Q.length*100)+"%";
+    $("pcount").textContent=`Vraag ${idx+1} / ${Q.length}`;
+    $("ptheme").textContent=q.theme;
+    $("qstep").textContent=q.theme;
+    $("qtext").textContent=q.text;
+    if(q.help){ $("qhelp").style.display="block"; $("qhelp").textContent=q.help; } else { $("qhelp").style.display="none"; }
+    $("backBtn").disabled = idx===0;
+    const keys=["A","B","C","D"];
+    const wrap=$("opts"); wrap.innerHTML="";
+    q.opts.forEach((o,i)=>{
+      const b=document.createElement("button");
+      b.className="opt"+(answers[q.id]===o.v?" sel":"");
+      b.innerHTML=`<span class="k">${keys[i]}</span><span>${o.label}</span>`;
+      b.onclick=()=>choose(o.v);
+      wrap.appendChild(b);
+    });
+  }
+
+  function choose(v){
+    answers[Q[idx].id]=v;
+    if(idx<Q.length-1){ idx++; setTimeout(render,140); }
+    else { setTimeout(finish,180); }
+  }
+  function back(){ if(idx>0){ idx--; render(); } }
+
+  function finish(){
+    $("quiz").style.display="none";
+    $("bar").style.width="100%";
+    const r=score();
+    paint(r);
+    $("result").style.display="block";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  // ---- Scoring logic ----
+  function score(){
+    const a=answers;
+    // EU-groottecriteria: 'groot' = 250+ fte EN >€50M omzet.
+    // We nemen het hoogste signaal als leidend: één 'groot'-antwoord tilt je uit 'klein',
+    // twee 'groot'-antwoorden maken je definitief groot. Zo voorkomen we dat 250+ fte
+    // met lage omzet ten onrechte als vrijgesteld scoort.
+    const vals=[a.fte,a.omzet];
+    const grootCount=vals.filter(v=>v==="groot").length;
+    const kleinCount=vals.filter(v=>v==="klein").length;
+    const isGroot = grootCount===2;                              // zeker groot: verbod geldt nu
+    const isKlein = kleinCount===2 && grootCount===0;            // zeker klein: alleen als beide klein
+    const isMiddel = !isGroot && !isKlein;                        // al het tussenliggende
+    const sizeUncertain = grootCount===1 && kleinCount===1;      // 250+ fte maar lage omzet, of omgekeerd
+    const textiel = a.textiel==="ja";
+
+    const flags=[];
+    // process flags only meaningful re: the ban, but disclosure/knowledge apply broadly
+    if(a.praktijk==="vernietig") flags.push({t:"r",b:"U vernietigt of recyclet nog onverkochte voorraad",s:"Dit is precies wat het verbod raakt. Elke afvoer heeft nu een geldige uitzonderingsgrond én bewijs nodig."});
+    if(a.praktijk==="onbekend") flags.push({t:"r",b:"Onbekend wat er met onverkochte voorraad gebeurt",s:"Zonder zicht op uw afvoerproces kunt u niet aantonen dat u compliant bent — dat is op zichzelf een risico."});
+    if(a.praktijk==="mix") flags.push({t:"a",b:"Uw afvoerproces is niet eenduidig",s:"Zonder helder proces per stuk is moeilijk aan te tonen dat vernietiging terecht was."});
+    if(a.reden==="deels") flags.push({t:"r",b:"U legt een reden vast, maar zonder onderbouwend bewijs",s:"Een reden-veld in uw systeem ('beschadigd', 'retour') volstaat niet. Bij controle moet u per grond het vereiste bewijsstuk kunnen tonen — dat is een veelgemaakte fout."});
+    if(a.reden==="nee"||a.reden==="adhoc") flags.push({t:"r",b:"Reden van afvoer wordt niet gestructureerd vastgelegd",s:"De wet vereist dat u per zending de reden kunt aantonen. Ad hoc is bij controle niet genoeg."});
+    if(a.bewijs==="nee") flags.push({t:"r",b:"Bewijs per uitzonderingsgrond ontbreekt (5-jaarsplicht)",s:"Per grond is specifiek bewijs vereist — een foto of interne notitie volstaat meestal niet."});
+    if(a.verwerker==="nee"||a.verwerker==="onbekend") flags.push({t:"a",b:"Afvalverwerker wordt niet vooraf geïnformeerd",s:"Artikel 4 vereist een verklaring over de uitzonderingsgrond bij aflevering."});
+    if(a.rapportage==="nee") flags.push({t:"r",b:"Geen jaarlijkse openbaarmaking van afgevoerde voorraad",s:"Voor grote ondernemingen geldt deze rapportageplicht nu al."});
+    if(a.rapportage==="wip") flags.push({t:"a",b:"Rapportageproces is nog in opbouw",s:"Zorg dat het staat vóór uw eerstvolgende rapportagemoment."});
+    if(a.recycling==="nee") flags.push({t:"a",b:"Recycling telt óók als vernietiging",s:"Voorraad naar een recycler sturen is niet automatisch compliant — dat verrast veel bedrijven."});
+    if(a.fabrikant==="ja"||a.fabrikant==="deels") flags.push({t:"a",b:"Aansprakelijkheid in uw keten verdient aandacht",s:"Bij een fabrikant buiten de EU verschuift de verantwoordelijkheid — vaak naar u als importeur."});
+
+    let level, title, body, applicable=true;
+
+    if(!textiel){
+      applicable=false;
+      level="info";
+      title="Het vernietigingsverbod geldt (nog) niet voor u";
+      body="U geeft aan geen kleding, accessoires of schoeisel op de markt te brengen. Het textielverbod raakt u dan niet. Let op: de bredere rapportageplicht voor onverkochte goederen kan alsnog gelden, en andere productgroepen kunnen later volgen.";
+      return {level,title,body,flags:flags.filter(f=>f.b.includes("Recycling")||f.b.includes("rapportage")||f.b.includes("openbaarmaking")),applicable};
+    }
+    if(isKlein){
+      applicable=false;
+      level="laag";
+      title="U bent waarschijnlijk vrijgesteld van het verbod";
+      body="Micro- en kleine ondernemingen vallen niet onder het vernietigingsverbod. Toch is het slim de basis op orde te hebben — de regels kunnen in de toekomst breder worden, en klanten vragen er steeds vaker naar.";
+      return {level,title,body,flags:flags.slice(0,3),applicable};
+    }
+
+    const reds=flags.filter(f=>f.t==="r").length;
+    const ambers=flags.filter(f=>f.t==="a").length;
+
+    // Onzekere grootte: 250+ fte met lage omzet, of hoge omzet met weinig personeel.
+    // Niet automatisch groot of klein — eerlijk als 'laten verifiëren' framen.
+    if(sizeUncertain){
+      level = reds>=2 ? "hoog" : "middel";
+      title="Uw bedrijfsomvang vraagt een preciezere toets";
+      body="Uw personeelsomvang en omzet vallen in verschillende categorieën. Of het verbod nu al voor u geldt, hangt af van de exacte drempels (250+ medewerkers én meer dan €50M omzet). Ondertussen zijn de onderstaande punten hoe dan ook relevant.";
+      return {level,title,body,flags,applicable};
+    }
+
+    if(isMiddel){
+      // obligated from 2030 — framed as preparation
+      if(reds>=2){ level="middel"; title="U heeft tijd tot 2030 — maar er is werk te doen"; }
+      else { level="laag"; title="U staat er relatief goed voor richting 2030"; }
+      body="Als middelgrote onderneming geldt het verbod voor u vanaf 19 juli 2030. De processen die u nu opzet, bepalen hoe soepel die overgang verloopt. De onderstaande punten zijn uw voorbereiding.";
+      return {level,title,body,flags,applicable};
+    }
+
+    // Large & textiles → obligated now
+    if(reds>=2){ level="hoog"; title="Hoog risico — het verbod geldt nú voor u"; body="U bent een grote onderneming in textiel: het verbod en de bewijsplicht zijn sinds 19 juli 2026 van kracht. Er zijn meerdere punten die directe aandacht vragen om handhavingsrisico te beperken."; }
+    else if(reds===1||ambers>=2){ level="middel"; title="Aandacht nodig — enkele gaten in uw compliance"; body="Het verbod geldt nu voor u. De basis staat deels, maar er zijn punten die u snel wilt dichten voordat een controle of rapportagemoment komt."; }
+    else { level="laag"; title="Goede basis — houd het scherp"; body="Het verbod geldt nu voor u en uw proces oogt op orde. Blijf het bewijs en de rapportage consequent bijhouden; daar zit het handhavingsrisico."; }
+    return {level,title,body,flags,applicable};
+  }
+
+  function paint(r){
+    const v=$("verdict"); v.className="verdict "+r.level;
+    const lvlLabels={hoog:"Hoog risico",middel:"Aandacht nodig",laag:"Laag risico",info:"Niet van toepassing"};
+    $("lvlText").textContent=lvlLabels[r.level];
+    $("verdictTitle").textContent=r.title;
+    $("verdictBody").textContent=r.body;
+
+    // meter
+    const order=["laag","middel","hoog"];
+    const active=r.level==="info"?-1:order.indexOf(r.level);
+    $("meter").innerHTML="";
+    order.forEach((seg,i)=>{
+      const d=document.createElement("div");
+      d.className="seg"+(i<=active&&active>=0?` on ${r.level}`:"");
+      $("meter").appendChild(d);
+    });
+    $("meter").style.display = r.level==="info" ? "none" : "flex";
+
+    // flags
+    if(r.flags.length){
+      $("flagWrap").style.display="block";
+      const list=$("flagList"); list.innerHTML="";
+      const icons={r:"✕",a:"!",g:"✓"};
+      r.flags.forEach(f=>{
+        const d=document.createElement("div");
+        d.className="flag "+f.t;
+        d.innerHTML=`<span class="ic">${icons[f.t]}</span><span class="t"><b>${f.b}</b><span>${f.s}</span></span>`;
+        list.appendChild(d);
+      });
+    } else {
+      $("flagWrap").style.display="none";
+    }
+    window._result=r;
+  }
+
+  // ====================================================================
+  // FORMSPREE INSTELLEN — vervang FORM_ID hieronder door je eigen ID.
+  // 1. Maak gratis account op formspree.io
+  // 2. Maak een nieuw formulier aan -> je krijgt een endpoint zoals
+  //    https://formspree.io/f/xdorwpqz
+  // 3. Plak alleen het laatste stukje (xdorwpqz) hieronder.
+  // Zolang hier FORM_ID staat, valt de tool automatisch terug op mailto.
+  // ====================================================================
+  const FORMSPREE_ID = "FORM_ID";
+
+  async function sendResult(){
+    const email=$("email").value.trim();
+    const msg=$("captureMsg");
+    const btn=document.querySelector(".capture .btn");
+
+    if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+      msg.style.display="block"; msg.style.color="#e6a99b";
+      msg.textContent="Vul een geldig e-mailadres in."; return;
+    }
+
+    const r=window._result||{};
+    const flagsText=(r.flags||[]).map(f=>"• "+f.b).join("\n");
+    const antwoorden=Q.map(q=>{
+      const gekozen=(q.opts.find(o=>o.v===answers[q.id])||{}).label||"—";
+      return `${q.text}\n   → ${gekozen}`;
+    }).join("\n");
+
+    // Fallback naar mailto zolang Formspree nog niet is ingesteld
+    if(FORMSPREE_ID==="FORM_ID"){
+      const subject=encodeURIComponent("ESPR Self-Check resultaat: "+(r.level||""));
+      const body=encodeURIComponent(`Resultaat: ${r.title||""}\n\nAandachtspunten:\n${flagsText}\n\nAntwoorden:\n${antwoorden}\n\nE-mail: ${email}`);
+      window.location.href=`mailto:contact@esprready.com?subject=${subject}&body=${body}`;
+      msg.style.display="block"; msg.style.color="#bcd6c8";
+      msg.textContent="Uw mailprogramma opent met het resultaat — druk op verzenden.";
+      return;
+    }
+
+    btn.disabled=true; btn.textContent="Versturen…";
+    msg.style.display="block"; msg.style.color="#bcd6c8"; msg.textContent="";
+
+    try{
+      const res=await fetch(`https://formspree.io/f/${FORMSPREE_ID}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Accept":"application/json"},
+        body:JSON.stringify({
+          email:email,
+          _subject:`ESPR Self-Check — ${r.level||""} risico`,
+          risiconiveau:r.level||"",
+          conclusie:r.title||"",
+          aandachtspunten:flagsText||"geen",
+          antwoorden:antwoorden
+        })
+      });
+      if(!res.ok) throw new Error("verzenden mislukt");
+      msg.style.color="#bcd6c8";
+      msg.textContent="Gelukt — u ontvangt het overzicht per e-mail. We nemen binnen één werkdag contact op.";
+      btn.textContent="Verzonden ✓";
+      $("email").disabled=true;
+    }catch(err){
+      msg.style.color="#e6a99b";
+      msg.textContent="Verzenden lukte niet. Mail ons gerust direct op contact@esprready.com.";
+      btn.disabled=false; btn.textContent="Stuur mij het overzicht";
+    }
+  }
+
+  function restart(){
+    idx=0; for(const k in answers) delete answers[k];
+    $("result").style.display="none"; $("quiz").style.display="none";
+    $("intro").style.display="block"; $("captureMsg").style.display="none"; $("email").value="";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+</script>
+</body>
+</html>
