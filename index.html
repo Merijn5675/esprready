@@ -251,6 +251,29 @@
   .final .btn-primary{background:var(--go);border-color:var(--go)}
   .final .btn-primary:hover{background:#37795a}
 
+  /* ---- request form ---- */
+  .reqform{max-width:620px;margin:34px auto 0;text-align:left}
+  .rf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .rf-field{display:flex;flex-direction:column}
+  .rf-full{margin-top:14px}
+  .rf-field label{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:0.05em;
+    text-transform:uppercase;color:#9fb0a6;margin-bottom:6px}
+  .rf-field label .opt{text-transform:none;letter-spacing:0;color:#7b877d}
+  .rf-field input,.rf-field select,.rf-field textarea{
+    background:#1f2c26;border:1px solid #35443c;border-radius:3px;padding:12px 14px;
+    color:#fff;font:inherit;font-size:15px;width:100%;font-family:"Inter",sans-serif;
+  }
+  .rf-field textarea{resize:vertical;min-height:76px}
+  .rf-field input::placeholder,.rf-field textarea::placeholder{color:#7b877d}
+  .rf-field select{appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239fb0a6' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:38px}
+  .rf-field input:focus,.rf-field select:focus,.rf-field textarea:focus{
+    outline:2px solid var(--go);outline-offset:1px;border-color:var(--go)}
+  .rf-submit{margin-top:20px;width:100%;text-align:center;border:none;cursor:pointer;font-size:15px}
+  .rf-msg{font-family:"IBM Plex Mono",monospace;font-size:13px;margin:14px 0 0;text-align:center}
+  .rf-fine{font-family:"IBM Plex Mono",monospace;font-size:11px;color:#7b877d;margin:14px 0 0;text-align:center}
+
   /* ---- footer ---- */
   footer{background:var(--paper);padding:44px 0;border-top:1px solid var(--line)}
   .foot{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-start}
@@ -270,6 +293,7 @@
     .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid var(--line)}
     .deliver{grid-template-columns:1fr;gap:32px}
     .selfcheck-band{grid-template-columns:1fr;gap:28px;padding:28px 22px}
+    .rf-grid{grid-template-columns:1fr}
     .aside{position:static}
     .scope-grid{grid-template-columns:1fr}
     .flow{flex-direction:column}
@@ -494,9 +518,55 @@
   <section class="final" id="aanvragen">
     <div class="wrap">
       <h2>Weet binnen een week waar u staat</h2>
-      <p>Vraag de ESPR Quick-Scan aan. We nemen binnen één werkdag contact op om de aanlevering af te stemmen.</p>
-      <a href="mailto:contact@esprready.com?subject=Aanvraag%20ESPR%20Quick-Scan&amp;body=Bedrijf%3A%0AAantal%20medewerkers%3A%0AOmzet%20(indicatie)%3A%0AContactpersoon%3A%0A" class="btn btn-primary">Vraag de Quick-Scan aan</a>
-      <p style="margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#9fb0a6">Nog niet zover? <a href="/self-check.html" style="color:#bcd6c8">Doe eerst de gratis self-check →</a></p>
+      <p>Vul het formulier in en we nemen binnen één werkdag contact op om de aanlevering af te stemmen.</p>
+
+      <div class="reqform" id="reqform">
+        <div class="rf-grid">
+          <div class="rf-field">
+            <label for="rf-bedrijf">Bedrijfsnaam</label>
+            <input type="text" id="rf-bedrijf" placeholder="Uw organisatie">
+          </div>
+          <div class="rf-field">
+            <label for="rf-naam">Contactpersoon</label>
+            <input type="text" id="rf-naam" placeholder="Voor- en achternaam">
+          </div>
+          <div class="rf-field">
+            <label for="rf-email">Zakelijk e-mailadres</label>
+            <input type="email" id="rf-email" placeholder="naam@bedrijf.nl" autocomplete="email">
+          </div>
+          <div class="rf-field">
+            <label for="rf-tel">Telefoon <span class="opt">(optioneel)</span></label>
+            <input type="tel" id="rf-tel" placeholder="+31 6 ...">
+          </div>
+          <div class="rf-field">
+            <label for="rf-omvang">Aantal medewerkers</label>
+            <select id="rf-omvang">
+              <option value="">Kies…</option>
+              <option value="Meer dan 250">Meer dan 250</option>
+              <option value="50-250">50 tot 250</option>
+              <option value="Minder dan 50">Minder dan 50</option>
+            </select>
+          </div>
+          <div class="rf-field">
+            <label for="rf-omzet">Jaaromzet (indicatie)</label>
+            <select id="rf-omzet">
+              <option value="">Kies…</option>
+              <option value="Meer dan 50M">Meer dan €50 miljoen</option>
+              <option value="10-50M">€10 – 50 miljoen</option>
+              <option value="Minder dan 10M">Minder dan €10 miljoen</option>
+            </select>
+          </div>
+        </div>
+        <div class="rf-field rf-full">
+          <label for="rf-vraag">Uw situatie of vraag <span class="opt">(optioneel)</span></label>
+          <textarea id="rf-vraag" rows="3" placeholder="Bijvoorbeeld: wat er nu met onverkochte voorraad gebeurt, of waar u tegenaan loopt."></textarea>
+        </div>
+        <button class="btn btn-primary rf-submit" onclick="sendRequest()">Vraag de Quick-Scan aan</button>
+        <p class="rf-msg" id="rf-msg" style="display:none"></p>
+        <p class="rf-fine">Geen verplichting. We gebruiken uw gegevens alleen om contact op te nemen over uw aanvraag.</p>
+      </div>
+
+      <p style="margin-top:26px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#9fb0a6">Nog niet zover? <a href="/self-check.html" style="color:#bcd6c8">Doe eerst de gratis self-check →</a></p>
       <p style="margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#9fb0a6">contact@esprready.com</p>
     </div>
   </section>
@@ -518,6 +588,55 @@
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
   },{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // ====================================================================
+  // Quick-Scan aanvraagformulier -> Formspree
+  // Zelfde endpoint als de self-check; het onderwerp maakt ze uit elkaar.
+  // ====================================================================
+  const FORMSPREE_ID = "xwlejooy";
+
+  async function sendRequest(){
+    const g = id => document.getElementById(id).value.trim();
+    const msg = document.getElementById("rf-msg");
+    const btn = document.querySelector(".rf-submit");
+
+    const bedrijf=g("rf-bedrijf"), naam=g("rf-naam"), email=g("rf-email"),
+          tel=g("rf-tel"), omvang=g("rf-omvang"), omzet=g("rf-omzet"), vraag=g("rf-vraag");
+
+    const show=(txt,kleur)=>{ msg.style.display="block"; msg.style.color=kleur; msg.textContent=txt; };
+
+    if(!bedrijf || !naam){ show("Vul uw bedrijfsnaam en naam in.","#e6a99b"); return; }
+    if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ show("Vul een geldig e-mailadres in.","#e6a99b"); return; }
+
+    btn.disabled=true; btn.textContent="Versturen…";
+    show("","#bcd6c8");
+
+    try{
+      const res=await fetch(`https://formspree.io/f/${FORMSPREE_ID}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Accept":"application/json"},
+        body:JSON.stringify({
+          email:email,
+          _subject:`Quick-Scan aanvraag — ${bedrijf}`,
+          type:"Quick-Scan aanvraag",
+          bedrijf:bedrijf,
+          contactpersoon:naam,
+          telefoon:tel||"—",
+          medewerkers:omvang||"—",
+          omzet:omzet||"—",
+          situatie:vraag||"—"
+        })
+      });
+      if(!res.ok) throw new Error("mislukt");
+      document.querySelector(".rf-grid").style.display="none";
+      document.querySelector(".rf-full").style.display="none";
+      btn.style.display="none";
+      show("Bedankt — uw aanvraag is ontvangen. We nemen binnen één werkdag contact op.","#bcd6c8");
+    }catch(err){
+      show("Verzenden lukte niet. Mail ons gerust direct op contact@esprready.com.","#e6a99b");
+      btn.disabled=false; btn.textContent="Vraag de Quick-Scan aan";
+    }
+  }
 </script>
 </body>
 </html>

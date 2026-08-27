@@ -141,6 +141,43 @@
   .nextstep p{font-size:15px;color:var(--ink-soft);margin-bottom:18px}
   .nextstep .btn{display:inline-block;text-decoration:none}
 
+  /* answers recap */
+  .answers{margin:26px 0 0}
+  .answers h3{font-size:15px;font-family:"IBM Plex Mono",monospace;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .arow{padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .arow .aq{color:var(--muted)}
+  .arow .aa{color:var(--ink);margin-top:3px}
+  .arow .aa::before{content:"→ ";color:var(--go)}
+
+  /* save bar */
+  .savebar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:26px}
+  .btn-outline{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+  .btn-outline:hover{background:var(--ink);color:var(--paper)}
+  .savehint{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+
+  /* print header/footer — hidden on screen, shown on paper */
+  .printhead,.printfoot{display:none}
+
+  @media print{
+    @page{margin:16mm}
+    body{background:#fff;font-size:11pt}
+    header,footer,main{padding:0;border:none}
+    header,.noprint,.restart,#gate,#intro,#quiz{display:none!important}
+    main{display:block}
+    .wrap{max-width:100%;padding:0}
+    .printhead{display:flex;justify-content:space-between;align-items:baseline;
+      border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:20px}
+    .ph-brand{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15pt}
+    .ph-brand span{color:var(--go)}
+    .ph-meta{font-family:"IBM Plex Mono",monospace;font-size:9pt;color:var(--muted)}
+    .printfoot{display:block;margin-top:22px;padding-top:12px;border-top:1px solid var(--line);
+      font-family:"IBM Plex Mono",monospace;font-size:8pt;color:var(--muted);line-height:1.6}
+    .verdict{break-inside:avoid;border-width:1px}
+    .flag,.arow{break-inside:avoid}
+    .flags h3,.answers h3{font-size:10pt}
+    a{text-decoration:none;color:inherit}
+  }
+
   /* capture */
   .capture{background:var(--ink);color:var(--paper);border-radius:5px;padding:28px}
   .capture h3{color:#fff;font-size:21px;margin-bottom:8px}
@@ -225,7 +262,7 @@
 
         <div class="capture">
           <h3>Bekijk uw volledige resultaat</h3>
-          <p>Vul uw e-mailadres in om uw risiconiveau en alle aandachtspunten direct te zien. U ontvangt het overzicht ook per e-mail.</p>
+          <p>Vul uw e-mailadres in om uw risiconiveau en alle aandachtspunten direct te zien. U kunt het overzicht daarna als PDF bewaren.</p>
           <div class="field">
             <input type="email" id="email" placeholder="naam@bedrijf.nl" autocomplete="email">
             <button class="btn" onclick="sendResult()">Toon mijn resultaat</button>
@@ -237,6 +274,11 @@
 
       <!-- REVEALED: shown after email is submitted -->
       <div id="revealed" style="display:none">
+        <div class="printhead">
+          <div class="ph-brand">espr<span>ready</span></div>
+          <div class="ph-meta">ESPR Self-Check · <span id="printDate"></span></div>
+        </div>
+
         <div class="verdict" id="verdict">
           <div class="lvl"><span class="dotlvl"></span><span id="lvlText"></span></div>
           <div class="meter" id="meter"></div>
@@ -249,11 +291,23 @@
           <div id="flagList"></div>
         </div>
 
-        <div class="nextstep">
+        <div class="answers" id="answerWrap">
+          <h3>Uw antwoorden</h3>
+          <div id="answerList"></div>
+        </div>
+
+        <div class="savebar noprint">
+          <button class="btn btn-outline" onclick="window.print()">↓ Bewaar als PDF</button>
+          <span class="savehint">Kies in het printvenster "Opslaan als PDF"</span>
+        </div>
+
+        <div class="nextstep noprint">
           <h3>Wat is de volgende stap?</h3>
           <p>De self-check geeft een eerste indicatie. Wilt u weten wat dit concreet betekent voor uw organisatie — inclusief welk bewijs u per uitzonderingsgrond nodig heeft en welke outlets bij uw voorraad passen — dan brengt de ESPR Quick-Scan dat in kaart.</p>
           <a href="/index.html#scan" class="btn">Bekijk de Quick-Scan →</a>
         </div>
+
+        <p class="printfoot">Deze self-check is oriënterend en vormt geen juridisch advies of audit. Gebaseerd op Verordening (EU) 2024/1781 en Gedelegeerde Verordening (EU) 2026/296. · esprready.com · contact@esprready.com</p>
       </div>
 
       <div class="restart"><button onclick="restart()">Opnieuw beginnen</button></div>
@@ -552,7 +606,7 @@
   // 3. Plak alleen het laatste stukje (xdorwpqz) hieronder.
   // Zolang hier FORM_ID staat, valt de tool automatisch terug op mailto.
   // ====================================================================
-  const FORMSPREE_ID = "https://formspree.io/f/xwlejooy";
+  const FORMSPREE_ID = "xwlejooy";
 
   async function sendResult(){
     const email=$("email").value.trim();
@@ -609,6 +663,25 @@
   function revealResult(){
     const r=window._result||{};
     paint(r);
+
+    // Antwoordenoverzicht (nuttig in de PDF)
+    const al=$("answerList");
+    if(al){
+      al.innerHTML="";
+      Q.forEach(q=>{
+        const gekozen=(q.opts.find(o=>o.v===answers[q.id])||{}).label||"—";
+        const d=document.createElement("div");
+        d.className="arow";
+        d.innerHTML=`<div class="aq">${q.text}</div><div class="aa">${gekozen}</div>`;
+        al.appendChild(d);
+      });
+    }
+
+    const pd=$("printDate");
+    if(pd){
+      pd.textContent=new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
+    }
+
     $("gate").style.display="none";
     $("revealed").style.display="block";
     window.scrollTo({top:0,behavior:"smooth"});
