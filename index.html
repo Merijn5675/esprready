@@ -272,6 +272,8 @@
     outline:2px solid var(--go);outline-offset:1px;border-color:var(--go)}
   .rf-submit{margin-top:20px;width:100%;text-align:center;border:none;cursor:pointer;font-size:15px}
   .rf-msg{font-family:"IBM Plex Mono",monospace;font-size:13px;margin:14px 0 0;text-align:center}
+  .rf-msg.rf-success{font-family:"Spectral",serif;font-size:19px;line-height:1.5;
+    background:rgba(47,106,76,.18);border:1px solid #2f6a4c;border-radius:4px;padding:22px 24px;margin-top:8px}
   .rf-fine{font-family:"IBM Plex Mono",monospace;font-size:11px;color:#7b877d;margin:14px 0 0;text-align:center}
 
   /* ---- footer ---- */
@@ -518,7 +520,7 @@
   <section class="final" id="aanvragen">
     <div class="wrap">
       <h2>Weet binnen een week waar u staat</h2>
-      <p>Vul het formulier in en we nemen binnen één werkdag contact op om de aanlevering af te stemmen.</p>
+      <p id="rf-intro">Vul het formulier in en we nemen binnen één werkdag contact op om de aanlevering af te stemmen.</p>
 
       <div class="reqform" id="reqform">
         <div class="rf-grid">
@@ -630,8 +632,11 @@
       if(!res.ok) throw new Error("mislukt");
       document.querySelector(".rf-grid").style.display="none";
       document.querySelector(".rf-full").style.display="none";
+      document.querySelector(".rf-fine").style.display="none";
+      document.getElementById("rf-intro").style.display="none";
       btn.style.display="none";
-      show("Bedankt — uw aanvraag is ontvangen. We nemen binnen één werkdag contact op.","#bcd6c8");
+      msg.classList.add("rf-success");
+      show("✓ Bedankt, uw aanvraag is ontvangen. We nemen binnen één werkdag contact met u op.","#bcd6c8");
     }catch(err){
       show("Verzenden lukte niet. Mail ons gerust direct op contact@esprready.com.","#e6a99b");
       btn.disabled=false; btn.textContent="Vraag de Quick-Scan aan";
