@@ -6,8 +6,38 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://esprready.com/self-check</loc>
+    <loc>https://esprready.com/self-check.html</loc>
     <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://esprready.com/artikelen.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://esprready.com/valt-mijn-bedrijf-onder-espr-vernietigingsverbod.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://esprready.com/recycling-telt-als-vernietiging-espr.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://esprready.com/bewijs-per-espr-uitzonderingsgrond.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://esprready.com/espr-vernietigingsverbod-retouren.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://esprready.com/espr-rapportageplicht-onverkochte-voorraad.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>
